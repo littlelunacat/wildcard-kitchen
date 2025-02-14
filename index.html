@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wildcard Kitchen</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #1c1c1c;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .credits {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #f1c40f;
+      margin-top: auto; /* This pushes the text to the bottom of the page */
+      padding: 20px 0;
+    }
+
+    h2 {
+      color: #f1c40f;
+      text-align: center;
+      font-size: 2.5rem;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 800px;
+      padding: 20px;
+      background-color: #2c3e50;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      margin: auto;
+    }
+
+    .game-input {
+      margin: 20px 10px 20px 0;
+      padding: 10px;
+      width: 50%;
+      font-size: 1.2rem;
+      text-align: center;
+      border-radius: 10px;
+      border: 2px solid #f1c40f;
+      background-color: #34495e;
+      color: white;
+    }
+
+    button {
+      background-color: #f1c40f;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e67e22;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #e67e22;
+      font-weight: bold;
+    }
+
+    .card-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background: #2c3e50;
+      min-width: 120px;
+      border: none;
+      box-shadow: none;
+    }
+
+    .card-buttons-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .card-box button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    
+    .card-result {
+      padding: 15px;
+      background-color: #34495e;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      font-size: 1.3rem;
+      min-height: 150px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .game-button {
+      background-color: #000;
+      color: white;
+    }
+
+    .game-button:hover {
+      background-color: #555;
+    }
+
+    .rand-game-button {
+      background-color: #555;
+      color: white;
+    }
+
+    .rand-game-button:hover {
+      background-color: #000;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-controls .game-text {
+      display: inline;
+      font-size: 1.2rem;
+    }
+
+    .glow {
+      box-shadow: 0 0 20px #f1c40f;
+      transition: box-shadow 0.5s ease-in-out;
+    }
+
+    .glow-fade {
+      box-shadow: 0 0 5px #f1c40f; /* Reduced glow for fading effect */
+    }
+
+  </style>
+  <script>
+    var gameNumber;
+
+    function setgameNumber() {
+      gameNumber = document.getElementById("gameInput").value;
+      if (!gameNumber) {
+        alert("Please enter a game number.");
+        return;
+      }
+      document.getElementById("gameStatus").innerText = `Game Number: ${gameNumber}`;
+    }
+
+    function fetchFromApi(endpoint) {
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbwksKy1JjkQHOt87BcUWCytNpk2AhcsR8zIFDUh_eAx2rcwGyM6i_od0WaZ5anW1cxV/exec'; // Your Apps Script URL
+      return fetch(`${scriptUrl}?gameNumber=${gameNumber}&endpoint=${endpoint}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error); // Display error message if any
+          }
+          return data;
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          alert("An error occurred while fetching the data.");
+        });
+    }
+
+    function getDishType() {
+      revealCard("resultDish", "getDishType");
+    }
+
+    function getCookingTime() {
+      revealCard("resultCookingTime", "getCookingTime");
+    }
+
+    function getMandatoryIngredients() {
+      revealCard("resultIngredients", "getMandatoryIngredients");
+    }
+
+    function getWildCard() {
+      revealCard("resultWildCard", "getWildCard");
+    }
+
+    function revealCard(cardId, endpoint) {
+      var card = document.getElementById(cardId);
+      
+      // 1. Make the card glow immediately
+      card.classList.add("glow");
+      card.innerHTML = `<p>Dealing...</p>`; // Show temporary text
+      
+      // 2. Wait briefly before fetching (optional: 300ms delay for better effect)
+      setTimeout(() => {
+        fetchFromApi(endpoint).then(data => {
+          // 3. Update card content after fetch
+          // Instead of inserting the whole object, access the property based on the endpoint
+          if (data.dishType) {
+            card.innerHTML = `<p>${data.dishType}</p>`;  // For dishType
+          } else if (data.cookingTime) {
+            card.innerHTML = `<p>${data.cookingTime}</p>`;  // For cookingTime
+          } else if (data.ingredients) {
+            card.innerHTML = `<p>${data.ingredients}</p>`;  // For ingredients
+          } else if (data.wildCard) {
+            card.innerHTML = `<p>${data.wildCard}</p>`;  // For wildCard
+          } else {
+            card.innerHTML = `<p>Unknown data format</p>`;
+          }
+          
+          // 4. Add the fade effect (slowly reduce the glow intensity)
+          setTimeout(() => {
+            card.classList.add("glow-fade");  // Apply fade effect
+          }, 300); // Delay before fading begins
+        });
+      }, 300); // Adjust delay if needed
+    }
+
+
+    function generategameNumber() {
+      var gameNum = Math.floor(1000 + Math.random() * 9000); // 4-digit number
+      document.getElementById("gameInput").value = gameNum;
+    }
+
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(function(page) {
+        page.classList.remove('active');
+      });
+    
+      document.getElementById(pageId).classList.add('active');
+    
+      if (pageId === 'page1') {
+        document.getElementById("gameStatus").innerText = ""; // Clear game status
+      }
+    
+      if (pageId === 'page2') {
+        resetCards(); // Hide previously revealed cards
+      }
+    }
+
+    function resetCards() {
+      document.getElementById("resultDish").innerHTML = "";
+      document.getElementById("resultCookingTime").innerHTML = "";
+      document.getElementById("resultIngredients").innerHTML = "";
+      document.getElementById("resultWildCard").innerHTML = "";
+    
+      // Remove glow effect if still active
+      document.querySelectorAll(".card-result").forEach(card => {
+        card.classList.remove("glow", "glow-fade");
+      });
+    }
+
+    function handleGameAndSwitch() {
+      setgameNumber();
+      if (gameNumber) {
+        switchPage('page2');
+      }
+    }
+
+    function drawWildCardAgain() {
+      getWildCard();
+    }
+  </script>
+</head>
+
+<body>
+
+  <h2>Wildcard Kitchen</h2>
+
+  <!-- Page 1: Game Buttons -->
+  <div id="page1" class="container page active">
+    <div class="game-controls">
+      <span class="game-text">Enter Game Number or</span>
+      <button onclick="generategameNumber()" class="rand-game-button">Generate Random Game</button>
+    </div>
+
+    <div class="game-controls">
+      <input type="text" id="gameInput" class="game-input" placeholder="Game Number">
+    </div>
+
+    <div id="gameStatus" class="status"></div>
+
+    <button onclick="handleGameAndSwitch()" class="game-button">Deal Cards</button>
+  </div>
+
+  <!-- Page 2: Card Buttons -->
+  <div id="page2" class="container page">
+    <div class="card-buttons-container">
+      <div class="card-box">
+        <button onclick="getDishType()">Dish</button>
+        <div id="resultDish" class="card-result"></div>
+      </div>
+    
+      <div class="card-box">
+        <button onclick="getCookingTime()">Time</button>
+        <div id="resultCookingTime" class="card-result"></div>
+      </div>
+    
+      <div class="card-box">
+        <button onclick="getMandatoryIngredients()">Ingredient</button>
+        <div id="resultIngredients" class="card-result"></div>
+      </div>
+    
+      <div class="card-box">
+        <button onclick="getWildCard()">Wildcard</button>
+        <div id="resultWildCard" class="card-result"></div>
+      </div>
+    </div>
+
+    <!-- New button to draw a wildcard again -->
+    <button onclick="drawWildCardAgain()" class="rand-game-button">Switch Wildcard</button>
+    
+    <!-- New button to return to game selection -->
+    <button onclick="switchPage('page1')" class="game-button">Return to Game Selection</button>
+  </div>
+
+  <p class="credits">This app is developed proudly by Luna and Cat</p>
+</body>
+
+</html>
