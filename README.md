@@ -1,4 +1,4 @@
-# wildcard-kitchen
+# Looking for a Wildcard Kitchen App? Check out this fan-made card dealer!
 
 Hey everyone! 👋
 
