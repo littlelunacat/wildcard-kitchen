@@ -22,7 +22,7 @@
       text-align: center;
       font-size: 0.9rem;
       color: #f1c40f;
-      margin-top: auto; /* This pushes the text to the bottom of the page */
+      margin-top: auto;
       padding: 20px 0;
     }
 
@@ -246,7 +246,6 @@
       }, 300); // Adjust delay if needed
     }
 
-
     function generategameNumber() {
       var gameNum = Math.floor(1000 + Math.random() * 9000); // 4-digit number
       document.getElementById("gameInput").value = gameNum;
@@ -337,10 +336,10 @@
       </div>
     </div>
 
-    <!-- New button to draw a wildcard again -->
+    <!-- button to draw a wildcard again -->
     <button onclick="drawWildCardAgain()" class="rand-game-button">Switch Wildcard</button>
     
-    <!-- New button to return to game selection -->
+    <!-- button to return to game selection -->
     <button onclick="switchPage('page1')" class="game-button">Return to Game Selection</button>
   </div>
 
