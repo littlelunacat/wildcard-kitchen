@@ -228,15 +228,23 @@
 
     function revealCard(cardId, endpoint) {
       var card = document.getElementById(cardId);
+
+      // Remove any existing glow or fade effect before applying the new glow
+      card.classList.remove("glow", "glow-fade"); 
       
-      // 1. Make the card glow immediately
+      // Force a small delay before reapplying glow to retrigger the effect
+      setTimeout(() => {
+        card.classList.add("glow");
+      }, 10);
+      
+      // Make the card glow immediately
       card.classList.add("glow");
       card.innerHTML = `<p>Dealing...</p>`; // Show temporary text
       
-      // 2. Wait briefly before fetching (optional: 300ms delay for better effect)
+      // Wait briefly before fetching (optional: 300ms delay for better effect)
       setTimeout(() => {
         fetchFromApi(endpoint).then(data => {
-          // 3. Update card content after fetch
+          // Update card content after fetch
           // Instead of inserting the whole object, access the property based on the endpoint
           if (data.dishType) {
             card.innerHTML = `<p>${data.dishType}</p>`;  // For dishType
@@ -250,7 +258,7 @@
             card.innerHTML = `<p>Unknown data format</p>`;
           }
           
-          // 4. Add the fade effect (slowly reduce the glow intensity)
+          // Add the fade effect (slowly reduce the glow intensity)
           setTimeout(() => {
             card.classList.add("glow-fade");  // Apply fade effect
           }, 300); // Delay before fading begins
